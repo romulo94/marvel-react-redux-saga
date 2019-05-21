@@ -38,20 +38,13 @@ function CardItem({ classes, data }) {
           </Typography>
         </CardContent>
       </CardActionArea>
-      {/* <CardActions>
-        <Button size="small" color="primary">
-          Share
-        </Button>
-        <Button size="small" color="primary">
-          Learn More
-        </Button>
-      </CardActions> */}
     </Card>
   );
 }
 
 CardItem.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.shape({}).isRequired,
+  data: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles)(CardItem);

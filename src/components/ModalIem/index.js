@@ -1,57 +1,63 @@
-import React from 'react';
+import React, { Component } from 'react';
+
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import Modal from '@material-ui/core/Modal';
 
-function getModalStyle() {
-  const top = 50;
-  const left = 50;
+import Modal from 'react-modal';
 
-  return {
-    top: `${top}%`,
-    left: `${left}%`,
-    transform: `translate(-${top}%, -${left}%)`,
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import Content from './components/Content';
+import { Creators as ModalActions } from '../../store/ducks/modal';
+
+import './styles.css';
+
+Modal.setAppElement(document.getElementById('root'));
+PropTypes.oneOfType([PropTypes.number, PropTypes.instanceOf(Date)]);
+class ModalItem extends Component {
+  static propTypes = {
+    modal: PropTypes.shape({
+      open: PropTypes.bool,
+      id: PropTypes.number,
+    }).isRequired,
+    hideModal: PropTypes.func.isRequired,
+    comics: PropTypes.shape({}).isRequired,
   };
+
+  handleHideModal = () => {
+    const { hideModal } = this.props;
+    hideModal();
+  };
+
+  render() {
+    const { modal, comics } = this.props;
+    const element = comics.data.find(el => el.id === modal.id);
+    return (
+      <Modal
+        isOpen={modal.open}
+        onRequestClose={this.handleHideModal}
+        contentLabel="Add User Modal"
+        className="modal-container"
+        overlayClassName="modal-overlay"
+      >
+        {element ? <Content element={element} /> : null}
+      </Modal>
+    );
+  }
 }
 
-const styles = theme => ({
-  paper: {
-    position: 'absolute',
-    width: theme.spacing.unit * 50,
-    backgroundColor: theme.palette.background.paper,
-    boxShadow: theme.shadows[5],
-    padding: theme.spacing.unit * 4,
-    outline: 'none',
-  },
+const mapStateToProps = state => ({
+  modal: state.modal,
+  comics: state.comics,
 });
 
-const SimpleModal = ({ classes, data, open }) => (
-  <div>
-    <Modal
-      aria-labelledby="simple-modal-title"
-      aria-describedby="simple-modal-description"
-      open={open}
-      // onClose={this.handleClose}
-    >
-      <div style={getModalStyle()} className={classes.paper}>
-        <Typography variant="h6" id="modal-title">
-          {data.name}
-        </Typography>
-        <Typography variant="subtitle1" id="simple-modal-description">
-          {data.description}
-        </Typography>
-        <SimpleModalWrapped />
-      </div>
-    </Modal>
-  </div>
+const mapDispatchToProps = dispatch => bindActionCreators(
+  {
+    ...ModalActions,
+  },
+  dispatch,
 );
 
-SimpleModal.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
-// We need an intermediary variable for handling the recursive nesting.
-const SimpleModalWrapped = withStyles(styles)(SimpleModal);
-
-export default SimpleModalWrapped;
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(ModalItem);
